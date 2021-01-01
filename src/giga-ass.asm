@@ -1815,7 +1815,7 @@ W8FFE:
       sty  $B7                          ; Length of current file name
       lda  #$0E                         
       ldy  #$6E                         
-      ldx  #$08                         
+      ldx  #$09                         
       jsr  $FFBA                        ; Routine: Set primary, secondary and logical addresses
       jsr  $FFC0                        ; Routine: Open a logical file
       bcc  W9019                        
@@ -3207,7 +3207,7 @@ W997D:
 W9986:
       jsr  $E257                        
       ldy  #$00                         
-      ldx  #$08                         
+      ldx  #$09                         
 W998D:
       jmp  $FFBA                        ; Routine: Set primary, secondary and logical addresses
 
@@ -3652,7 +3652,7 @@ W9C4C:
       tay                               
       ldx  #$00                         
       jsr  $FFBD                        ; Routine: Set file name
-      ldx  #$08                         
+      ldx  #$09                         
       ldy  #$60                         
       jsr  $FFBA                        ; Routine: Set primary, secondary and logical addresses
       jsr  $F3D5                        ; Routine: Sends file name on serial bus
@@ -3709,7 +3709,7 @@ W9CB8:
       beq  W9C4C                        
       bne  W9CEC                        
 W9CCA:
-      lda  #$08                         
+      lda  #$09                         
       sta  $BA                          ; Current device number
       jsr  $FFB4                        ; Routine: Set to Trasmit the serial bus device
       lda  #$6F                         
@@ -3726,7 +3726,7 @@ W9CD8:
       jmp  W8537                        
 
 W9CEC:
-      lda  #$08                         
+      lda  #$09                         
       sta  $BA                          ; Current device number
       jsr  $FFB1                        ; Routine: Set to Receive the devices to the serial bus
       lda  #$6F                         
