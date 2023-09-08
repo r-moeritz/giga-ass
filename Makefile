@@ -4,9 +4,10 @@ OBJDIR := dist
 SRC := $(SRCDIR)/giga-ass.asm
 PRG := $(OBJDIR)/giga-ass.prg
 CRT := $(OBJDIR)/giga-ass.crt
+LST := $(OBJDIR)/giga-ass.lst
 
 # Commands
-MKPRG = dasm $(SRC) -o$(PRG)
+MKPRG = dasm $(SRC) -l$(LST) -o$(PRG)
 MKCRT = cartconv -t normal -i $(PRG) -o $(CRT)
 RM := rm -rf
 MKDIR := mkdir -p
@@ -31,6 +32,6 @@ run: $(CRT)
 # Rules
 $(PRG): $(SRC)
 	$(MKPRG)
-	
+
 $(CRT): $(PRG)
 	$(MKCRT)

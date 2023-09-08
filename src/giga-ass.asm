@@ -1,8 +1,8 @@
 ;****************************
 ;  Giga-Ass by Thomas Dachsel
 ;
-;  Disassembled with JC64dis 
-;  version 0.9 by Ice Team
+;  Disassembled by Ralph Moeritz
+;  using JC64dis  by Ice Team
 ;
 ;  https://github.com/ice00/jc64
 ;  
@@ -11,11 +11,11 @@
 
       .org $8000
 
-
-      .word $849D, $9FAE
-      .byte $C3, $C2, $CD, "80"
-      .word $84AA
-W800B:
+      .word RESET
+      .word NMI
+      .byte $C3, $C2, $CD, "80" ; CBM80
+      .word INIT
+T_MNEMONIC:
       .byte "CPX", "CPY", "LDX", "LDY" 
       .byte "CMP", "ADC", "AND", "DEC"
       .byte "EOR", "INC", "LDA", "ASL"
@@ -30,63 +30,77 @@ W800B:
       .byte "DEY", "INY", "DEX", "INX"
       .byte "BPL", "BMI", "BVC", "BVS"
       .byte "BCC", "BCS", "BNE", "BEQ"
-W80B3:
-      .byte $E4, $C4, $A6
-W80B6:
-      .byte $A4, $C5, $65, $25, $C6, $45, $E6, $A5
-      .byte $06, $24, $46, $05, $26, $66, $E5, $85
-      .byte $86, $84, $4C, $20, $8A, $AA, $98, $A8
-      .byte $BA, $9A, $08, $28, $48, $68, $00, $40
-      .byte $60, $EA, $18, $38, $58
-W80DB:
-      .byte $78, $B8, $D8, $F8, $88, $C8, $CA, $E8
-      .byte $10, $30, $50, $70, $90, $B0, $D0
-W80EA:
-      .byte $F0
-W80EB:
+T_OPCODES:
+      .byte $E4, $C4, $A6, $A4
+      .byte $C5, $65, $25, $C6 
+      .byte $45, $E6, $A5, $06
+      .byte $24, $46, $05, $26
+      .byte $66, $E5, $85, $86
+      .byte $84, $4C, $20, $8A
+      .byte $AA, $98, $A8, $BA
+      .byte $9A, $08, $28, $48
+      .byte $68, $00, $40, $60
+      .byte $EA, $18, $38, $58
+      .byte $78, $B8, $D8, $F8
+      .byte $88, $C8, $CA, $E8
+      .byte $10, $30, $50, $70
+      .byte $90, $B0, $D0, $F0
+T_MNEMXFORM1:
       .byte $40, $40, $54, $68, $7B, $7B, $7B, $28
       .byte $7B, $28, $7B, $A8, $00, $A8, $7B, $A8
       .byte $A8, $7B, $3B, $04, $08
-W8100:
+T_MNEMXFORM2:
       .byte $0C, $FC, $10, $10, $14, $18, $04, $04
-W8108:
+T_MNEMXFORM3:
       .byte $02, $02, $02, $02, $03, $03, $02
-W810F:
-      .byte $01, $2B, $2D, $2A, $2F
-W8114:
-      .byte $5E
-W8115:
-      .byte $41, $4F
-W8117:
-      .byte $3E, $3D
-W8119:
-      .byte $3C
+T_MNEMXFORM4:
+      .byte $01 
+T_BINARYOPS:
+      .byte $2B, $2D, $2A, $2F, $5E
+      .byte $41, $4F, $3E, $3D, $3C
+T_ERRMSG1:
       .byte "TERM EVALUATIO", $CE
+T_ERRMSG2:
       .byte "TOKE", $CE
+T_ERRMSG3:
       .byte "INDEXIN", $C7
+T_ERRMSG4:
       .byte "LINE FORMA", $D4
-      .byte "ADDRESSIN", $C7 
+T_ERRMSG5:
+      .byte "ADDRESSIN", $C7
+T_ERRMSG6:
       .byte "BRANC", $C8
+T_ERRMSG7:
       .byte "UNDEFINED SYMBO", $CC
+T_ERRMSG8:
       .byte "ILLEGAL SYMBO", $CC
+T_ERRMSG9:
       .byte "SYMBOL TABLE FUL", $CC
+T_ERRMSG10:
       .byte "NO MACRO TO CLOS", $C5
+T_ERRMSG11:
       .byte "DOUBLE LABE", $CC
+T_ERRMSG12:
       .byte "PARAMETE", $D2
+T_ERRMSG13:
       .byte "RETUR", $CE
+T_ERRMSG14:
       .byte "UNDEFINED MACR", $CF
+T_ERRMSG15:
       .byte "MACRO NOT CLOSE", $C4
+T_ERRMSG16:
       .byte "IF-ELSE-ENDI", $C6
+T_ERRMSG17:
       .byte ".BASE MISSIN", $C7
-W81E5:
-      .byte $1A
-W81E6:
-      .byte $81, $29, $81, $2E, $81, $36, $81, $41
-      .byte $81, $4B, $81, $51, $81, $61, $81, $6F
-      .byte $81, $80, $81, $91, $81, $9D, $81, $A6
-      .byte $81, $AC, $81, $BB, $81, $CB, $81, $D8
-      .byte $81
-W8207:
+T_EMSGADRLO:
+      .byte #<T_ERRMSG1
+T_EMSGADRHI:
+      .byte #>T_ERRMSG1
+      .word T_ERRMSG2, T_ERRMSG3, T_ERRMSG4, T_ERRMSG5
+      .word T_ERRMSG6, T_ERRMSG7, T_ERRMSG8, T_ERRMSG9
+      .word T_ERRMSG10, T_ERRMSG11, T_ERRMSG12, T_ERRMSG13
+      .word T_ERRMSG14, T_ERRMSG15, T_ERRMSG16, T_ERRMSG17
+T_PSEUDOOPS:
       .byte "CAL", $CC
       .byte "MACR", $CF
       .byte "ENDMACR", $CF
@@ -112,7 +126,7 @@ W8207:
       .byte "NOCOD", $C5
       .byte "STAR", $D4
       .byte "NOEX", $D0
-W827A:
+V_PSEUDOOPS:
       .word $9079, $9053, $9152, $8E09
       .word $8E18, $8E9A, $8F2E, $8F9E
       .word $8EC0, $8FE0, $8E69, $8E78
@@ -120,16 +134,16 @@ W827A:
       .word $91CC, $9421, $9331, $903E
       .word $946B, $9369, $949E, $94A5
       .word $94B1
-W82AC:
+T_EDICMD:
       .byte "MVLSADNETPFRI@QOBGCXY"
-W82C1:
+V_EDICMD:
       .word $995A, $998F, $9992, $999F
       .word $974E, $97D7, $98F2, $9873
       .word $9F07, $988D, $99A8, $9B32
       .word $9C49, $9CBD, $9F23, $9E12
       .word $9E2C, $9EEC, $84A9, $8BFD
       .word $9D09
-W82EB:
+T_STARTMSG:
       .byte $93, $0D
       .byte "  *** GIGA-ASS (C) MARKT & TECHNIK ***", $0D, $0D
       .byte "  BY THOMAS DACHSEL   ", $00, $0D
@@ -157,13 +171,14 @@ W82EB:
       .byte " K)", $0D, $00, $0D
       .byte "<SPACE> FOR .START OR <RUN/STOP>", $00, $0D
       .byte "GIGA-ASS READY", $0D, $00
-W849D:
+RESET:
       sei                               
       jsr  $FDA3                        
       jsr  $FD50                        ; Routine RAMTAS of KERNAL
       jsr  $FD15                        ; Routine RESTOR of KERNAL
 W84A7:
       jsr  $FF5B                        ; Routine CINT of KERNAL
+INIT:
       sei                               
       lda  #$00                         
       ldx  #$80                         
@@ -259,9 +274,9 @@ W8557:
 W8568:
       asl                               
       tax                               
-      lda  W81E5,x                      
+      lda  T_EMSGADRLO,x                      
       sta  $22                          ; Utility programs pointers area
-      lda  W81E6,x                      
+      lda  T_EMSGADRHI,x                      
       sta  $23                          ; Utility programs pointers area
 W8574:
       lda  #$0E                         
@@ -415,7 +430,7 @@ W8664:
 W8677:
       ldx  #$0A                         
 W8679:
-      cmp  W810F,x                      
+      cmp  T_MNEMXFORM4,x                      
       beq  W8683                        
       dex                               
       bne  W8679                        
@@ -646,7 +661,7 @@ W87EA:
 
 W87F3:
       ldx  $41                          ; Pointer: DATA current element address
-      and  W80EB,x                      
+      and  T_MNEMXFORM1,x                      
       bne  W880B                        
       ldx  $3E                          ; Pointer: BASIC instruction for CONT
       cpx  #$02                         
@@ -673,9 +688,9 @@ W880B:
       rts                               
 
 W8820:
-      lda  W8108,x                      
+      lda  T_MNEMXFORM3,x                      
       sta  $42                          ; Pointer: DATA current element address
-      lda  W8100,x                      
+      lda  T_MNEMXFORM2,x                      
       clc                               
       adc  $3B                          ; BASIC precedent line number
       sta  $3B                          ; BASIC precedent line number
@@ -1516,7 +1531,7 @@ W8DEF:
       tax                               
       lda  $827B,x                      
       pha                               
-      lda  W827A,x                      
+      lda  V_PSEUDOOPS,x                      
       pha                               
       cpx  #$12                         
       bcs  W8E01                        
@@ -2209,7 +2224,7 @@ W92AA:
       and  #$3F                         
       sta  $41                          ; Pointer: DATA current element address
       tax                               
-      lda  W80B3,x                      
+      lda  T_OPCODES,x                      
       sta  $3B                          ; BASIC precedent line number
       jsr  W86A6                        
       jsr  W8781                        
@@ -2538,7 +2553,7 @@ W94F4:
 W94FC:
       ldx  #$15                         
 W94FE:
-      cmp  W82AC,x                      
+      cmp  T_EDICMD,x                      
       beq  W9509                        
       dex                               
       bpl  W94FE                        
@@ -2550,7 +2565,7 @@ W9509:
       tax                               
       lda  $82C2,x                      
       pha                               
-      lda  W82C1,x                      
+      lda  V_EDICMD,x                      
       pha                               
       rts                               
 
@@ -2622,13 +2637,13 @@ W9575:
       bpl  W958A                        
       and  #$7F                         
       sta  $3B                          ; BASIC precedent line number
-      lda  W8207,y                      
+      lda  T_PSEUDOOPS,y                      
       and  #$7F                         
       cmp  $3B                          ; BASIC precedent line number
       bne  W959C                        
       beq  W95AF                        
 W958A:
-      lda  W8207,y                      
+      lda  T_PSEUDOOPS,y                      
       php                               
       and  #$7F                         
       cmp  $0200,x                      ; INPUT buffer of BASIC
@@ -2640,7 +2655,7 @@ W958A:
 W959B:
       plp                               
 W959C:
-      lda  W8207,y                      
+      lda  T_PSEUDOOPS,y                      
       bmi  W95A4                        
       iny                               
       bne  W959C                        
@@ -2734,7 +2749,7 @@ W961F:
       sty  $41                          ; Pointer: DATA current element address
 W9625:
       lda  $0200,x                      ; INPUT buffer of BASIC
-      cmp  W800B,y                      
+      cmp  T_MNEMONIC,y                      
       bne  W963D                        
       lda  $0201,x                      ; INPUT buffer of BASIC
       cmp  $800C,y                      
@@ -3384,12 +3399,12 @@ W9AA9:
       bmi  W9AB6                        
 W9AAD:
       iny                               
-      lda  W8207,y                      
+      lda  T_PSEUDOOPS,y                      
       bpl  W9AAD                        
       iny                               
       bne  W9AA9                        
 W9AB6:
-      lda  W8207,y                      
+      lda  T_PSEUDOOPS,y                      
       php                               
       and  #$7F                         
       jsr  $FFD2                        ; Routine: Send a char in the channel
@@ -3408,7 +3423,7 @@ W9AC9:
       adc  $22                          ; Utility programs pointers area
       sty  $22                          ; Utility programs pointers area
       tay                               
-      lda  W800B,y                      
+      lda  T_MNEMONIC,y                      
       jsr  $FFD2                        ; Routine: Send a char in the channel
       inx                               
       lda  $800C,y                      
@@ -3608,7 +3623,7 @@ W9C12:
       stx  $41                          ; Pointer: DATA current element address
 W9C18:
       lda  ($22),y                      ; Utility programs pointers area
-      cmp  W800B,x                      
+      cmp  T_MNEMONIC,x                      
       bne  W9C31                        
       iny                               
       lda  ($22),y                      ; Utility programs pointers area
@@ -4103,7 +4118,8 @@ W9FA6:
       eor  $58                          ; Scratch for numeric operation
       jmp  $4249                        
 
-      eor  $404F,y                      
+      eor  $404F,y                   
+NMI:      
       jsr  $F6BC                        ; Routine: Verifies pressure STOP/RVS keys
       jsr  $FFE1                        ; Routine: Terminate the keyboard scan
       beq  W9FB9                        
