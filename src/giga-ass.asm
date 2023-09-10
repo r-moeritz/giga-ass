@@ -335,7 +335,7 @@ W85DB:
 W85E1:
       jsr  $B113                        ; Routine: Verify if the char in A is in 'A'..'Z'
       bcc  W85EC                        
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       jmp  W865D                        
 
 W85EC:
@@ -786,17 +786,19 @@ W88AC:
       sec                               
       jmp  $BC49                        ; BASIC ROM
 
-W88B2:
+INSYMTBL:
       lda  $7A                          ; CHRGET (Introduce a char) subroutine
       ldx  $7B                          ; CHRGET (Introduce a char) subroutine
       sta  $49                          ; Pointer: variable for the FOR..NEXT
       stx  $4A                          ; Pointer: variable for the FOR..NEXT
+GETSYM:
       ldx  #$00                         
       jsr  $0079                        ; CHRGET (Introduce a char) subroutine
       jsr  $B113                        ; Routine: Verify if the char in A is in 'A'..'Z'
       bcs  W88CD                        
       lda  #$20                         
       sta  $81                          ; CHRGET (Introduce a char) subroutine
+ILLSYM:     
       lda  #$07                         
       jmp  W8568                        
 
@@ -804,18 +806,19 @@ W88CD:
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
       bcc  W88D7                        
       jsr  $B113                        ; Routine: Verify if the char in A is in 'A'..'Z'
-      bcc  W88DB                        
+      bcc  GETDELIM                        
 W88D7:
       inx                               
       jmp  W88CD                        
 
-W88DB:
+GETDELIM:
       cmp  #$5F                         
       beq  W88D7                        
       inx                               
       stx  $45                          ; BASIC current variable name
       lda  #$36                         
       sta  $01                          ; 6510 I/O register
+ISSYMDEFINED:      
       lda  #$F9                         
       ldx  #$BF                         
 W88EA:
@@ -823,10 +826,10 @@ W88EA:
 W88EC:
       sta  $5F                          ; Scratch for numeric operation
       cpx  $30                          ; Pointer: BASIC starting arrays
-      bcc  W8955                        
+      bcc  ISSYMONSTACK                        
       bne  W88F8                        
       cmp  $2F                          ; Pointer: BASIC starting arrays
-      bcc  W8955                        
+      bcc  ISSYMONSTACK                        
 W88F8:
       ldy  #$01                         
       lda  ($5F),y                      ; Scratch for numeric operation
@@ -880,7 +883,7 @@ W893A:
       iny                               
       cpy  $45                          ; BASIC current variable name
       bne  W893A                        
-      jmp  W89E6                        
+      jmp  FOUNDSYM                        
 
 W8948:
       lda  $5F                          ; Scratch for numeric operation
@@ -891,7 +894,7 @@ W8948:
       dex                               
       jmp  W88EA                        
 
-W8955:
+ISSYMONSTACK:
       pla                               
       tax                               
       pla                               
@@ -902,31 +905,31 @@ W8955:
       cmp  #$E8                         
       bne  W8975                        
       pha                               
-      beq  W8982                        
+      beq  SYMUNDEF                        
 W8965:
       cmp  #$90                         
       beq  W896F                        
       pha                               
       txa                               
       pha                               
-      jmp  W89A4                        
+      jmp  SAVESYM                        
 
 W896F:
       pha                               
       txa                               
       cmp  #$8B                         
-      beq  W8979                        
+      beq  MACROUNDEF                        
 W8975:
       pha                               
-      jmp  W89A4                        
+      jmp  SAVESYM                        
 
-W8979:
+MACROUNDEF:
       pha                               
       jsr  W89E0                        
       lda  #$0D                         
       jmp  W8568                        
 
-W8982:
+SYMUNDEF:
       jsr  W89E0                        
       lda  $FD                          
       cmp  #$02                         
@@ -947,11 +950,11 @@ W899D:
       ldy  #$00                         
       jmp  W88A8                        
 
-W89A4:
+SAVESYM:
       lda  $5F                          ; Scratch for numeric operation
       ldy  $60                          ; Scratch for numeric operation
       cpy  #$A0                         
-      bcc  W8A19                        
+      bcc  SYMTBLFULL                        
       sta  $2F                          ; Pointer: BASIC starting arrays
       sty  $30                          ; Pointer: BASIC starting arrays
       ldy  #$00                         
@@ -990,7 +993,7 @@ W89E0:
       sec                               
       rts                               
 
-W89E6:
+FOUNDSYM:
       jsr  W89D2                        
       lda  #$36                         
       sta  $01                          ; 6510 I/O register
@@ -1001,10 +1004,10 @@ W89E6:
       lda  ($49),y                      ; Pointer: variable for the FOR..NEXT
       sta  $63                          ; Floating point accumulator #1: Mantissa
       cmp  #$FF                         
-      bne  W8A0F                        
+      bne  PUTSYMVINFAC                        
       lda  $62                          ; Floating point accumulator #1: Mantissa
       cmp  #$FF                         
-      bne  W8A0F                        
+      bne  PUTSYMVINFAC                        
       lda  #$20                         
       sta  $81                          ; CHRGET (Introduce a char) subroutine
       lda  #$37                         
@@ -1012,14 +1015,14 @@ W89E6:
       lda  #$06                         
       jmp  W8568                        
 
-W8A0F:
+PUTSYMVINFAC:
       sty  $70                          ; Lo Byte #1 (rounding)
       jsr  W89E0                        
       jsr  W88AC                        
       clc                               
       rts                               
 
-W8A19:
+SYMTBLFULL:
       jsr  W89E0                        
       lda  #$20                         
       sta  $81                          ; CHRGET (Introduce a char) subroutine
@@ -1344,7 +1347,7 @@ W8C84:
 
 W8C9F:
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       ldy  #$00                         
       lda  $7A                          ; CHRGET (Introduce a char) subroutine
       sta  ($49),y                      ; Pointer: variable for the FOR..NEXT
@@ -1455,7 +1458,7 @@ W8D6C:
       lda  #$FF                         
       sta  $81                          ; CHRGET (Introduce a char) subroutine
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       lda  #$20                         
       sta  $81                          ; CHRGET (Introduce a char) subroutine
       bcs  W8D89                        
@@ -1546,7 +1549,7 @@ W8E09:
       rts                               
 
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       lda  #$FF                         
       ldy  #$01                         
       sta  ($5F),y                      ; Scratch for numeric operation
@@ -1554,7 +1557,7 @@ W8E16:
       jmp  W8E1F                        
 
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
 W8E1F:
       lda  #$3D                         
       jsr  $AEFF                        ; Routine: Verify if A is in current char (Syntax)
@@ -1893,7 +1896,7 @@ W907D:
       ora  $8C                          ; Real value of the RND seed
       sta  $8F                          ; Real value of the RND seed
       jsr  $0079                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       lda  $7B                          ; CHRGET (Introduce a char) subroutine
       pha                               
       sta  $02FD                        ; Not used
@@ -1932,7 +1935,7 @@ W90D0:
       jsr  W91D0                        
       jsr  W9124                        
       jsr  $0073                        ; CHRGET (Introduce a char) subroutine
-      jsr  W88B2                        
+      jsr  INSYMTBL                        
       lda  $3D                          ; Pointer: BASIC instruction for CONT
       ldx  $3C                          ; BASIC precedent line number
       jsr  W92D5                        
